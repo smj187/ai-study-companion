@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+  web:
+    container_name: web
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: development
+    ports:
+      - "3000:3000"
+    command: ["pnpm", "dev"]
