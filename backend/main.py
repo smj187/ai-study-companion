@@ -2,8 +2,10 @@ from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from revChatGPT.revChatGPT import Chatbot
 from typing import Dict
+from pydantic import BaseModel, Field
 
 from services.assemblyai import upload_local_file, get_transcription
+from services.youtube import youtube_video_download 
 from configure import ASSEMBLY_AI_KEY, OPEN_AI_EMAIL, OPEN_AI_PASSWORD
 
 app = FastAPI()
@@ -15,6 +17,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+class DownloadYouTubeVideoRequest(BaseModel):
+    url: str
+
+@app.post("/youtube")
+async def download_youtube_video(request: DownloadYouTubeVideoRequest):
+    local_file = youtube_video_download(request.url)
+    return local_file
+
+
 @app.post("/assembly")
 async def process_assembly_file(file: UploadFile = File(...)):
     # https://www.assemblyai.com/docs/audio-intelligence#summarization
@@ -25,10 +36,11 @@ async def process_assembly_file(file: UploadFile = File(...)):
     # catchy -> supports: headline,gist
     
     assembly_request_body: Dict[str, str | bool] = {
-        "summarization": True,
-        "summary_model": "conversational",
-        "summary_type": "bullets_verbose",
-        "speaker_labels": True
+        #"summarization": True,
+        #"summary_model": "informative",
+        #"summary_type": "bullets_verbose",
+        #"speaker_labels": True
+        "auto_chapters": True
     }
 
 
@@ -36,6 +48,7 @@ async def process_assembly_file(file: UploadFile = File(...)):
     uploaded_file_url = upload_local_file(file.file, ASSEMBLY_AI_KEY)
     data, err, sentences, paragraphs = get_transcription(uploaded_file_url, assembly_request_body, ASSEMBLY_AI_KEY)
     return data
+
 
 @app.get("/chatgpt")
 async def process_chatgpt(input_text: str, generate_question: bool):
