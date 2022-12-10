@@ -8,7 +8,7 @@ export const App: React.FC = () => {
   return (
     <div className="bg-white min-h-screen w-full relative">
       <Header />
-      <main className="max-w-7xl mx-auto pt-20">
+      <main className="max-w-7xl mx-auto pt-24">
         <Routes>
           <Route path="/" element={<AppView />} />
           <Route path="/upload" element={<UploadView />} />
@@ -18,4 +18,3 @@ export const App: React.FC = () => {
     </div>
   )
 }
-
