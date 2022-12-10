@@ -1,12 +1,17 @@
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, WebSocket, Request
 from fastapi.middleware.cors import CORSMiddleware
 from revChatGPT.revChatGPT import Chatbot
 from typing import Dict
 from pydantic import BaseModel, Field
+from deepgram import Deepgram
 
 from services.assemblyai import upload_local_file, get_transcription
 from services.youtube import youtube_video_download, get_video_information
 from configure import ASSEMBLY_AI_KEY, OPEN_AI_EMAIL, OPEN_AI_PASSWORD
+from services.assemblyai import upload_local_file, get_transcription, process_assembly_realtime
+from services.youtube import youtube_video_download 
+from services.deepgram import process_audio
+from configure import ASSEMBLY_AI_KEY, OPEN_AI_EMAIL, OPEN_AI_PASSWORD, DEEPGRAM_KEY
 
 app = FastAPI()
 app.add_middleware(
@@ -20,10 +25,23 @@ app.add_middleware(
 class DownloadYouTubeVideoRequest(BaseModel):
     url: str
 
-@app.post("/youtube")
-async def download_youtube_video(request: DownloadYouTubeVideoRequest):
-    local_file = youtube_video_download(request.url)
-    return local_file
+@app.get("/youtube")
+async def download_youtube_video(yt_url: str):
+    local_file_path = youtube_video_download(yt_url)
+    return local_file_path
+
+
+@app.get("/assembly/youtube")
+async def process_assembly_youtube(yt_url: str):
+    local_file_path = youtube_video_download(yt_url)
+    with open(local_file_path, mode='rb') as file:
+        assembly_request_body: Dict[str, str | bool] = {
+            "auto_chapters": True
+        }
+
+        uploaded_file_url = upload_local_file(file, ASSEMBLY_AI_KEY)
+        data, err, sentences, paragraphs = get_transcription(uploaded_file_url, assembly_request_body, ASSEMBLY_AI_KEY)
+        return data
 
 
 class YouTubeMetaRequest(BaseModel):
@@ -75,6 +93,35 @@ async def process_chatgpt(input_text: str, generate_question: bool):
     response = chatbot.get_chat_response(input_text, output="text")
     print(response) 
     return response
+
+
+@app.websocket("/listen")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+
+    try:
+        dg_client = Deepgram(DEEPGRAM_KEY)
+        deepgram_socket = await process_audio(websocket, dg_client) 
+
+        while True:
+            data = await websocket.receive_bytes()
+            deepgram_socket.send(data)
+    except Exception as e:
+        raise Exception(f'Could not process audio: {e}')
+    finally:
+        await websocket.close()
+
+# TODO wait for multiple stream allowance
+'''@app.websocket("/listen")
+async def realtime_websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    try:
+        process_assembly_realtime(websocket, ASSEMBLY_AI_KEY)
+    except Exception as e:
+        raise Exception(f'Could not process audio: {e}')
+    finally:
+        await websocket.close()'''
+    
 
 
 @app.get("/")

@@ -1,8 +1,17 @@
 import requests
 import time
 from typing import Dict
+import base64
+import json
+import websockets
+import asyncio 
+
+from fastapi import FastAPI, Request, WebSocket
+
+
 UPLOAD_ENDPOINT = "https://api.assemblyai.com/v2/upload"
 TRANSCRIPTION_ENDPOINT = "https://api.assemblyai.com/v2/transcript"
+REALTIME_ENDPOINT = "wss://api.assemblyai.com/v2/realtime/ws?sample_rate=16000"
 CHUNK_SIZE = 5_242_880  # 5MB
 
 # upload local file to assembly ai backend
@@ -101,3 +110,37 @@ def get_transcription(url: str, request_body: Dict[str, str | bool], x_api_key: 
             
         print("waiting for 3 seconds")
         time.sleep(3)
+
+
+async def forward(ws_a: WebSocket, ws_b: websockets.WebSocketClientProtocol):
+    while True:
+        stream = await ws_a.receive_bytes()
+        data = base64.b64encode(stream)
+        print(data)
+        json_data = json.dumps({"audio_data":str(stream)})
+        await ws_b.send(json_data)
+        await asyncio.sleep(0.01)
+
+
+async def reverse(ws_a: WebSocket, ws_b: websockets.WebSocketClientProtocol):
+    while True:
+        data = await ws_b.recv()
+        print("assembly:", data)
+        data = json.loads(data)
+        if 'text' in data:
+            result = data['text']
+
+            if json.loads(data)['message_type'] == 'FinalTranscript':
+                await ws_a.send_text(result)
+
+
+async def process_assembly_realtime(ws_a: WebSocket, key):
+    async with websockets.connect(
+        REALTIME_ENDPOINT,
+        extra_headers=(("Authorization", key),),
+        ping_interval=5,
+        ping_timeout=20
+    ) as _ws:
+        fwd_task = asyncio.create_task(forward(ws_a, _ws))
+        rev_task = asyncio.create_task(reverse(ws_a, _ws))
+        await asyncio.gather(fwd_task, rev_task)
