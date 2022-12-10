@@ -10,7 +10,7 @@ def youtube_video_download(url: str):
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'm4a',
         }],
-        'outtmpl': '/youtube/%(id)s.%(ext)s'
+        'outtmpl': '/assets/%(id)s.%(ext)s'
     }
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:

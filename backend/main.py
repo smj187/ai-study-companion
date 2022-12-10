@@ -20,10 +20,23 @@ app.add_middleware(
 class DownloadYouTubeVideoRequest(BaseModel):
     url: str
 
-@app.post("/youtube")
-async def download_youtube_video(request: DownloadYouTubeVideoRequest):
-    local_file = youtube_video_download(request.url)
-    return local_file
+@app.get("/youtube")
+async def download_youtube_video(yt_url: str):
+    local_file_path = youtube_video_download(yt_url)
+    return local_file_path
+
+
+@app.get("/assembly/youtube")
+async def process_assembly_youtube(yt_url: str):
+    local_file_path = youtube_video_download(yt_url)
+    with open(local_file_path, mode='rb') as file:
+        assembly_request_body: Dict[str, str | bool] = {
+            "auto_chapters": True
+        }
+
+        uploaded_file_url = upload_local_file(file, ASSEMBLY_AI_KEY)
+        data, err, sentences, paragraphs = get_transcription(uploaded_file_url, assembly_request_body, ASSEMBLY_AI_KEY)
+        return data
 
 
 @app.post("/assembly")

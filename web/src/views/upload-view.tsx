@@ -8,7 +8,7 @@ const BASE_URL = "http://localhost:8000"
 
 export const UploadView: React.FC = () => {
   const [file, setFile] = useState<File | null>(null)
-  const [url, setUrl] = useState<string | null>(null)
+  const [yt_url, setYouTubeUrl] = useState<string | null>(null)
 
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<string | null>(null)
@@ -23,29 +23,40 @@ export const UploadView: React.FC = () => {
 
     // TODO add youtube download
 
-    if (file === null && url === null) {
+    if (file === null && yt_url === null) {
       throw new Error("file or url must not be null")
     }    
     try {
       let assembly_response: any
-      const body = new FormData()
-      body.append("file", file)
-      
-      console.info("upload file...")
-      const assembly_data = await fetch(`${BASE_URL}/assembly`, {
-        body,
-        method: "POST"
-      })
-      assembly_response = await assembly_data.json()
+      if (yt_url !== null){
+        console.info("process youtube link...")
+        console.info(yt_url)
+        const url = (
+          `${BASE_URL}/assembly/youtube?` +
+          new URLSearchParams({ "yt_url": yt_url}).toString()
+        )
+        const assembly_data = await fetch(url)
+        assembly_response = await assembly_data.json()
+      } else {
+        const body = new FormData()
+        body.append("file", file)
+        
+        console.info("upload file...")
+        const assembly_data = await fetch(`${BASE_URL}/assembly`, {
+          body,
+          method: "POST"
+        })
+        assembly_response = await assembly_data.json()
+      }
       
       console.info("generate questions...")
-      console.log(assembly_response['chapters'][0]['summary'])
+      let summary: string = assembly_response['chapters'][0]['summary']
+      console.log(summary)
       const url = (
         `${BASE_URL}/chatgpt?` +
-        new URLSearchParams({ "input_text": assembly_response['chapters'][0]['summary'],
+        new URLSearchParams({ "input_text": summary,
                               "generate_question": true }).toString()
       )
-      console.log(url)
       const chatgpt_data = await fetch(url)
       const chatgpt_response = await chatgpt_data.json()
 
@@ -61,7 +72,7 @@ export const UploadView: React.FC = () => {
 
   return (
     <div className="flex flex-col space-y-9">
-      <YouTubeVideo setUrl={setUrl}/> 
+      <YouTubeVideo setYouTubeUrl={setYouTubeUrl}/> 
       <FileUpload setFile={setFile}/>
       <button
         onClick={onProcessing}

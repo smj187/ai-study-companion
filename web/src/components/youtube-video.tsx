@@ -1,6 +1,10 @@
 import React, { useState } from "react"
 
-export const YouTubeVideo = () => {
+interface Props {
+  setYouTubeUrl: (value: React.SetStateAction<String | null>) => void
+}
+
+export const YouTubeVideo: React.FC<Props> = ({ setYouTubeUrl }) => {
   const [url, setUrl] = useState("")
   const [valid, setValid] = useState(false)
 
@@ -11,8 +15,9 @@ export const YouTubeVideo = () => {
       /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/
     const match = e.target.value.match(regex)
     if (match !== null) {
-      console.log(match[1])
+      //console.log(match[1])
       setValid(true)
+      setYouTubeUrl(e.target.value)
     } else {
       setValid(false)
     }
