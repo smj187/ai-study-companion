@@ -2,6 +2,8 @@
 backend-env
 secrets.py
 
+*.m4a
+
 # Logs
 logs
 *.log
