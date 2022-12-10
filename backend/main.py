@@ -1,7 +1,5 @@
 from fastapi import FastAPI, File, UploadFile, WebSocket, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 from revChatGPT.revChatGPT import Chatbot
 from typing import Dict
 from pydantic import BaseModel, Field
@@ -85,12 +83,6 @@ async def process_chatgpt(input_text: str, generate_question: bool):
     return response
 
 
-# templates = Jinja2Templates(directory="./bla/templates")
-
-@app.get("/", response_class=HTMLResponse)
-def get(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
-
 @app.websocket("/listen")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
@@ -107,6 +99,7 @@ async def websocket_endpoint(websocket: WebSocket):
     finally:
         await websocket.close()
 
+# TODO wait for multiple stream allowance
 '''@app.websocket("/listen")
 async def realtime_websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
