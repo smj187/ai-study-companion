@@ -1,10 +1,6 @@
 import { useState } from "react"
 import { useAppContext } from "../context/app-context"
 import { twMerge } from "tailwind-merge"
-import { UseRecorder } from "../types/recorder"
-import useRecorder from "../hooks/use-recorder"
-import RecorderControls from "../components/recorder-controls"
-import RecordingsList from "../components/recordings-list"
 import { Recorder } from "vmsg"
 import { VoiceRecorder } from "../components/voice-recorder"
 
@@ -35,9 +31,6 @@ export const AppView: React.FC = () => {
   const onStopRecording = () => {
     setIsRecording(false)
   }
-
-  const { recorderState, ...handlers }: UseRecorder = useRecorder()
-  const { audio } = recorderState
 
   const showAnwser = (id: string) => {
     toggleVisibility(id)
@@ -113,9 +106,6 @@ export const AppView: React.FC = () => {
           </svg>
         </div>
       </div>
-
-      <RecorderControls recorderState={recorderState} handlers={handlers} />
-      <RecordingsList audio={audio} />
     </div>
   )
 }

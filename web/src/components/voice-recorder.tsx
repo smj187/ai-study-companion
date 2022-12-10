@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { twMerge } from "tailwind-merge"
 import { useVoiceRecorder } from "use-voice-recorder"
-import { WaveForm } from "./wave-form"
 import WaveSurfer from "wavesurfer.js"
 import "./wave.css"
 
@@ -19,7 +18,7 @@ export const VoiceRecorder: React.FC<Props> = () => {
 
   useEffect(() => {
     if (audioFileUrl !== null) {
-      console.log("got", audioFileUrl, reset)
+      // console.log("audioFileUrl changed", audioFileUrl)
 
       if (audioListRef.current === null) throw new Error("audioListRef is null")
       if (audioRef.current === null) throw new Error("audioRef is null")
@@ -106,7 +105,6 @@ export const VoiceRecorder: React.FC<Props> = () => {
 
   const onReset = () => {
     setReset(true)
-    console.log("reset")
     setAudioFileUrl(null)
     stop()
 
