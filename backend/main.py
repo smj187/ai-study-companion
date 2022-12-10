@@ -1,9 +1,10 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from revChatGPT.revChatGPT import Chatbot
 from typing import Dict
 
 from services.assemblyai import upload_local_file, get_transcription
-from secrets import ASSEMBLY_AI_KEY
+from configure import ASSEMBLY_AI_KEY, OPEN_AI_EMAIL, OPEN_AI_PASSWORD
 
 app = FastAPI()
 app.add_middleware(
@@ -35,6 +36,23 @@ async def process_assembly_file(file: UploadFile = File(...)):
     uploaded_file_url = upload_local_file(file.file, ASSEMBLY_AI_KEY)
     data, err, sentences, paragraphs = get_transcription(uploaded_file_url, assembly_request_body, ASSEMBLY_AI_KEY)
     return data
+
+@app.get("/chatgpt")
+async def process_chatgpt(input_text: str, generate_question: bool):
+    config = {
+        "email": OPEN_AI_EMAIL,
+        "password": OPEN_AI_PASSWORD,
+        #"session_token": "<SESSION_TOKEN>", # Deprecated. Use only if you encounter captcha with email/password
+        #"proxy": "<HTTP/HTTPS_PROXY>"
+    }
+
+    chatbot = Chatbot(config, conversation_id=None)
+    if generate_question:
+        input_text = "give a detailed question for the following information\n" + input_text
+    print(input_text)
+    response = chatbot.get_chat_response(input_text, output="text")
+    print(response) 
+    return response
 
 
 @app.get("/")
