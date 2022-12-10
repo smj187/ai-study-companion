@@ -21,3 +21,14 @@ pip install -r ./requirements.txt
 
 uvicorn main:app --host localhost --port 8000 --reload
 ```
+
+# run web app local
+
+```
+# make sure node, npm and pnpm is installed
+# https://pnpm.io/installation#using-npm
+npm install -g pnpm
+
+cd web
+pnpm dev
+```
