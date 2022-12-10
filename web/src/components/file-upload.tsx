@@ -5,7 +5,7 @@ interface Props {
   setFile: (value: React.SetStateAction<File | null>) => void
 }
 
-export const FileUpload: React.FC<Props> = ({ setFile }) => {
+export const FileUpload: React.FC<Props> = ({setFile}) => {
   const onDrop = useCallback((acceptedFiles: Array<File>) => {
     const file = acceptedFiles[0]
 
@@ -19,8 +19,8 @@ export const FileUpload: React.FC<Props> = ({ setFile }) => {
   })
 
   return (
-    <div className="max-w-md flex-grow w-full " {...getRootProps()}>
-      <label className="flex justify-center w-full h-40 px-4 transition border-2 border-gray-300 border-dashed rounded-md appearance-none cursor-pointer hover:border-gray-400 focus:outline-none">
+    <div {...getRootProps()} className="h-full w-full grid place-items-center">
+      <label className="">
         <span className="flex items-center space-x-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"

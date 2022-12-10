@@ -4,8 +4,6 @@ import { TextField } from "../components/text-field"
 import { YouTubeVideo } from "../components/youtube-video"
 import { useNavigate } from "react-router-dom"
 import { InputForm } from "../components/input-form"
-import { FileUpload2 } from "../components/file-upload-2"
-import { YouTubeVideo2 } from "../components/youtube-video2"
 
 const BASE_URL = "http://localhost:8000"
 
@@ -23,8 +21,6 @@ export const UploadView: React.FC = () => {
   const onProcessing = async () => {
     setLoading(true)
     setResult(null)
-
-    // TODO add youtube download
 
     if (file === null && yt_url === null) {
       throw new Error("file or url must not be null")
@@ -90,10 +86,10 @@ export const UploadView: React.FC = () => {
       <div className="flex flex-col py-9 space-y-6">
         <div className="flex w-full space-x-6">
           <InputForm>
-            <FileUpload2 />
+            <FileUpload setFile={setFile}/>
           </InputForm>
           <InputForm>
-            <YouTubeVideo2 setYouTubeUrl={setYouTubeUrl}/>
+            <YouTubeVideo setYouTubeUrl={setYouTubeUrl}/>
           </InputForm>
         </div>
 
@@ -134,33 +130,6 @@ export const UploadView: React.FC = () => {
               {loading ? "Processing..." : "Generate"}
             </span>
           </button>
-        </div>
-      </div>
-
-      <div className="mt-96 pt-96">
-        <YouTubeVideo setYouTubeUrl={setYouTubeUrl} />
-        <FileUpload setFile={setFile} />
-        <button
-          onClick={onProcessing}
-          className="bg-rose-600 text-white rounded px-3 py-2"
-        >
-          Process
-        </button>
-
-        <div>{loading ? "loading" : ""}</div>
-
-        <div>
-          {questions && answers && (
-            <div>
-              {" "}
-              <button
-                onClick={navigate("/exam")}
-                className="bg-rose-600 text-white rounded px-3 py-2"
-              >
-                Start learning
-              </button>
-            </div>
-          )}
         </div>
         <div>{result && <div> Summary (1. Chapter): {result} </div>}</div>
         <div>
