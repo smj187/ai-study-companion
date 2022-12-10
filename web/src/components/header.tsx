@@ -98,6 +98,19 @@ export const Header = () => {
                       My Files
                     </NavLink>
                   </li>
+                  <li className="mr-2">
+                    <NavLink
+                      onClick={() => setSelected("/realtime")}
+                      to={`/realtime`}
+                      className={
+                        selected === "/realtime"
+                          ? "inline-block p-5 text-rose-600 rounded-t-lg border-b-2 border-rose-600 active"
+                          : "inline-block p-5 rounded-t-lg border-b-2 border-transparent hover:text-gray-600 hover:border-gray-300"
+                      }
+                    >
+                      Realtime
+                    </NavLink>
+                  </li>
                 </ul>
               </div>
 

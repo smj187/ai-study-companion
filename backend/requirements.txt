@@ -18,3 +18,4 @@ yarg==0.1.9
 python-multipart==0.0.5
 revChatGPT==0.0.34.1
 yt-dlp==2022.11.11
+deepgram-sdk==2.2.0

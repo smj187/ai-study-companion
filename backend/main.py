@@ -1,12 +1,16 @@
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, WebSocket, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 from revChatGPT.revChatGPT import Chatbot
 from typing import Dict
 from pydantic import BaseModel, Field
+from deepgram import Deepgram
 
-from services.assemblyai import upload_local_file, get_transcription
+from services.assemblyai import upload_local_file, get_transcription, process_assembly_realtime
 from services.youtube import youtube_video_download 
-from configure import ASSEMBLY_AI_KEY, OPEN_AI_EMAIL, OPEN_AI_PASSWORD
+from services.deepgram import process_audio
+from configure import ASSEMBLY_AI_KEY, OPEN_AI_EMAIL, OPEN_AI_PASSWORD, DEEPGRAM_KEY
 
 app = FastAPI()
 app.add_middleware(
@@ -79,6 +83,40 @@ async def process_chatgpt(input_text: str, generate_question: bool):
     response = chatbot.get_chat_response(input_text, output="text")
     print(response) 
     return response
+
+
+# templates = Jinja2Templates(directory="./bla/templates")
+
+@app.get("/", response_class=HTMLResponse)
+def get(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
+@app.websocket("/listen")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+
+    try:
+        dg_client = Deepgram(DEEPGRAM_KEY)
+        deepgram_socket = await process_audio(websocket, dg_client) 
+
+        while True:
+            data = await websocket.receive_bytes()
+            deepgram_socket.send(data)
+    except Exception as e:
+        raise Exception(f'Could not process audio: {e}')
+    finally:
+        await websocket.close()
+
+'''@app.websocket("/listen")
+async def realtime_websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    try:
+        process_assembly_realtime(websocket, ASSEMBLY_AI_KEY)
+    except Exception as e:
+        raise Exception(f'Could not process audio: {e}')
+    finally:
+        await websocket.close()'''
+    
 
 
 @app.get("/")
