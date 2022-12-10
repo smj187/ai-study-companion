@@ -1,3 +1,5 @@
+import { nanoid } from "nanoid"
+
 export const getYouTubeThumbnail = (url: string): string | null => {
   const regExp =
     /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/
@@ -9,4 +11,16 @@ export const getYouTubeThumbnail = (url: string): string | null => {
   }
 
   return null
+}
+
+export const generateKey = () => {
+  return nanoid()
+}
+
+export const formatMinutes = (minutes: number) => {
+  return minutes < 10 ? `0${minutes}` : `${minutes}`
+}
+
+export const formatSeconds = (seconds: number) => {
+  return seconds < 10 ? `0${seconds}` : `${seconds}`
 }

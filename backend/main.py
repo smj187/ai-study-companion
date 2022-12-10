@@ -5,7 +5,7 @@ from typing import Dict
 from pydantic import BaseModel, Field
 
 from services.assemblyai import upload_local_file, get_transcription
-from services.youtube import youtube_video_download 
+from services.youtube import youtube_video_download, get_video_information
 from configure import ASSEMBLY_AI_KEY, OPEN_AI_EMAIL, OPEN_AI_PASSWORD
 
 app = FastAPI()
@@ -24,6 +24,15 @@ class DownloadYouTubeVideoRequest(BaseModel):
 async def download_youtube_video(request: DownloadYouTubeVideoRequest):
     local_file = youtube_video_download(request.url)
     return local_file
+
+
+class YouTubeMetaRequest(BaseModel):
+    url: str
+
+@app.post("/youtube/meta")
+async def youtube_meta_download(request: YouTubeMetaRequest):
+    meta = get_video_information(request.url)
+    return meta
 
 
 @app.post("/assembly")
