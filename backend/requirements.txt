@@ -19,3 +19,4 @@ python-multipart==0.0.5
 revChatGPT==0.0.34.1
 yt-dlp==2022.11.11
 deepgram-sdk==2.2.0
+pytube==12.1.0

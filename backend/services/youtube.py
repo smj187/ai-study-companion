@@ -11,7 +11,7 @@ def youtube_video_download(url: str):
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'm4a',
         }],
-        'outtmpl': '/assets/%(id)s.%(ext)s'
+        'outtmpl': './assets/%(id)s.%(ext)s'
     }
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -21,7 +21,7 @@ def youtube_video_download(url: str):
     match = re.search(r"youtube\.com/.*v=([^&]*)", url)
     if match:
         result = match.group(1)
-        return f"/assets/{result}.m4a"
+        return f"./assets/{result}.m4a"
     return ydl_opts
 
 def get_video_information(url: str) -> dict[str, str]:

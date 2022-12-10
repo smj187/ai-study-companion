@@ -1,3 +1,4 @@
+backend/assets/*
 # python
 backend-env
 secrets.py
