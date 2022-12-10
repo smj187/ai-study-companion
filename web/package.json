@@ -16,7 +16,9 @@
     "react-dropzone": "^14.2.3",
     "react-router-dom": "^6.4.5",
     "tailwind-merge": "^1.8.0",
+    "use-voice-recorder": "^1.0.4",
     "uuid": "^9.0.0",
+    "vmsg": "^0.4.0",
     "wavesurfer": "^1.3.4",
     "wavesurfer.js": "^6.4.0"
   },

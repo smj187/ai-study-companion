@@ -8,7 +8,7 @@ import { AppContextProvider } from "./context/app-context"
 export const App: React.FC = () => {
   return (
     <AppContextProvider>
-      <div className="bg-white min-h-screen w-full relative">
+      <div className="bg-gradient-to-br from-gray-100 to-gray-300 min-h-screen w-full relative">
         <Header />
         <main className="max-w-7xl mx-auto pt-24">
           <Routes>

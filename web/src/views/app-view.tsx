@@ -5,6 +5,8 @@ import { UseRecorder } from "../types/recorder"
 import useRecorder from "../hooks/use-recorder"
 import RecorderControls from "../components/recorder-controls"
 import RecordingsList from "../components/recordings-list"
+import { Recorder } from "vmsg"
+import { VoiceRecorder } from "../components/voice-recorder"
 
 export const AppView: React.FC = () => {
   const { questions, toggleVisibility } = useAppContext()
@@ -42,7 +44,8 @@ export const AppView: React.FC = () => {
   }
 
   return (
-    <div className="font-inter">
+    <div className="font-inter ">
+      <VoiceRecorder />
       <div className="flex space-x-3">
         <div
           onClick={() => showAnwser(questions[index].id)}
@@ -51,7 +54,7 @@ export const AppView: React.FC = () => {
           {questions[index].visibleAnswer ? (
             <div>click here to get chatGPT</div>
           ) : (
-            <div>anwser: {questions[index].anwser} </div>
+            <div>anwser: {questions[index].answer} </div>
           )}
         </div>
         <div className="flex  w-full h-40">

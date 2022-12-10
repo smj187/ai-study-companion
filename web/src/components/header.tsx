@@ -11,7 +11,7 @@ export const Header = () => {
   const [selected, setSelected] = useState(useLocation().pathname)
 
   return (
-    <Disclosure as="nav" className="bg-white shadow fixed w-full">
+    <Disclosure as="nav" className=" shadow fixed w-full">
       {({ open, close }) => (
         <>
           <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
