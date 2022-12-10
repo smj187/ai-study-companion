@@ -1,13 +1,15 @@
 import { NavLink } from "react-router-dom"
-import { Fragment, useState } from "react"
-import { Disclosure, Menu, Transition } from "@headlessui/react"
+import { useState } from "react"
+import { Disclosure } from "@headlessui/react"
+import { useLocation } from "react-router-dom"
 
 function classNames(...classes: any) {
   return classes.filter(Boolean).join(" ")
 }
 
 export const Header = () => {
-  const [selected, setSelected] = useState("app")
+  const [selected, setSelected] = useState(useLocation().pathname)
+
   return (
     <Disclosure as="nav" className="bg-white shadow">
       {({ open, close }) => (
@@ -72,10 +74,10 @@ export const Header = () => {
                 <ul className="flex flex-wrap -mb-px">
                   <li className="mr-2">
                     <NavLink
-                      onClick={() => setSelected("app")}
+                      onClick={() => setSelected("/")}
                       to={`/`}
                       className={
-                        selected === "app"
+                        selected === "/"
                           ? "inline-block p-5 text-rose-600 rounded-t-lg border-b-2 border-rose-600 active"
                           : "inline-block p-5 rounded-t-lg border-b-2 border-transparent hover:text-gray-600 hover:border-gray-300"
                       }
@@ -85,10 +87,10 @@ export const Header = () => {
                   </li>
                   <li className="mr-2">
                     <NavLink
-                      onClick={() => setSelected("upload")}
+                      onClick={() => setSelected("/upload")}
                       to={`/upload`}
                       className={
-                        selected === "upload"
+                        selected === "/upload"
                           ? "inline-block p-5 text-rose-600 rounded-t-lg border-b-2 border-rose-600 active"
                           : "inline-block p-5 rounded-t-lg border-b-2 border-transparent hover:text-gray-600 hover:border-gray-300"
                       }
@@ -126,11 +128,11 @@ export const Header = () => {
                 <NavLink
                   to={`/`}
                   onClick={() => {
-                    setSelected("app")
+                    setSelected("/")
                     close()
                   }}
                   className={
-                    selected === "app"
+                    selected === "/"
                       ? "bg-gray-100 cursor-pointer border-rose-500 text-rose-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
                       : "border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-200 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
                   }
@@ -142,11 +144,11 @@ export const Header = () => {
                 <NavLink
                   to={`/upload`}
                   onClick={() => {
-                    setSelected("upload")
+                    setSelected("/upload")
                     close()
                   }}
                   className={
-                    selected === "upload"
+                    selected === "/upload"
                       ? "bg-gray-100 cursor-pointer border-rose-500 text-rose-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
                       : "border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-200 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
                   }
