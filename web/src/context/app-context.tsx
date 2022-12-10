@@ -4,7 +4,7 @@ import { useLocalStorage } from "../hooks/useLocalStorage"
 interface Questions {
   id: string
   question: string
-  anwser: null | string
+  answer: null | string
   visibleAnswer: boolean
   voiceInputFile: File | null
   voiceInputUrl: string | null
@@ -33,7 +33,7 @@ export function AppContextProvider({
       {
         id: "0",
         question: "Question #1",
-        anwser: null,
+        answer: null,
         visibleAnswer: false,
         voiceInputFile: null,
         voiceInputUrl: null
@@ -41,7 +41,7 @@ export function AppContextProvider({
       {
         id: "1",
         question: "Question #2",
-        anwser: null,
+        answer: null,
         visibleAnswer: false,
         voiceInputFile: null,
         voiceInputUrl: null
@@ -49,7 +49,7 @@ export function AppContextProvider({
       {
         id: "2",
         question: "Question #3",
-        anwser: null,
+        answer: null,
         visibleAnswer: false,
         voiceInputFile: null,
         voiceInputUrl: null
@@ -57,7 +57,7 @@ export function AppContextProvider({
       {
         id: "3",
         question: "Question #4",
-        anwser: null,
+        answer: null,
         visibleAnswer: false,
         voiceInputFile: null,
         voiceInputUrl: null
@@ -65,7 +65,7 @@ export function AppContextProvider({
       {
         id: "4",
         question: "Question #5",
-        anwser: null,
+        answer: null,
         visibleAnswer: false,
         voiceInputFile: null,
         voiceInputUrl: null
@@ -73,7 +73,7 @@ export function AppContextProvider({
       {
         id: "5",
         question: "Question #6",
-        anwser: null,
+        answer: null,
         visibleAnswer: false,
         voiceInputFile: null,
         voiceInputUrl: null

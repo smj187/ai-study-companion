@@ -4,6 +4,16 @@ import { TextField } from "../components/text-field"
 import { YouTubeVideo } from "../components/youtube-video"
 import { useNavigate } from "react-router-dom"
 import { InputForm } from "../components/input-form"
+import { useLocalStorage } from "../hooks/useLocalStorage"
+
+interface Questions {
+  id: string
+  question: string
+  answer: null | string
+  visibleAnswer: boolean
+  voiceInputFile: File | null
+  voiceInputUrl: string | null
+}
 
 const BASE_URL = "http://localhost:8000"
 
@@ -13,8 +23,9 @@ export const UploadView: React.FC = () => {
 
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<string | null>(null)
-  const [questions, setQuestions] = useState<[string] | null>(null)
   const [answers, setAnswers] = useState<[string] | null>(null)
+
+  const [questions, setQuestions] = useLocalStorage<Array<Questions>>("questions",[])
 
   let navigate = useNavigate()
 
@@ -49,20 +60,38 @@ export const UploadView: React.FC = () => {
       }
       
       console.info("generate questions...")
-      console.log(assembly_response["chapters"][0]["summary"])
-      const url =
+      for (let i = 0; i < assembly_response["chapters"].length; i++) {
+        const url_question =
         `${BASE_URL}/chatgpt?` +
         new URLSearchParams({
-          input_text: assembly_response["chapters"][0]["summary"],
+          input_text: assembly_response["chapters"][i]["summary"],
           generate_question: true
-        }).toString()
-      console.log(url)
-      const chatgpt_data = await fetch(url)
-      const chatgpt_response = await chatgpt_data.json()
+          }).toString()
+
+        const chatgpt_question_data = await fetch(url_question)
+        const chatgpt_question = await chatgpt_question_data.json()
+
+        const url_answer =
+        `${BASE_URL}/chatgpt?` +
+        new URLSearchParams({
+          input_text: chatgpt_question['message'],
+          generate_question: false
+          }).toString()
+
+        const chatgpt_answer_data = await fetch(url_answer)
+        const chatgpt_answer = await chatgpt_answer_data.json()
+
+        questions.push({
+          id: i.toString(),
+          question: chatgpt_question['message'],
+          answer: chatgpt_answer['message'],
+          visibleAnswer: false,
+          voiceInputFile: null,
+          voiceInputUrl: null
+        })
+      }
 
       setResult(assembly_response["chapters"][0]["summary"])
-      setQuestions([chatgpt_response["message"]])
-      //setAnswers(chatgpt_response['message']) // todo generate answers
       setLoading(false)
     } catch (e) {
       console.error(e)
@@ -132,9 +161,6 @@ export const UploadView: React.FC = () => {
           </button>
         </div>
         <div>{result && <div> Summary (1. Chapter): {result} </div>}</div>
-        <div>
-          {questions && <div> Question (1. Chapter): {questions[0]} </div>}
-        </div>
       </div>
     </div>
   )
