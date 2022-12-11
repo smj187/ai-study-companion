@@ -3,15 +3,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from revChatGPT.revChatGPT import Chatbot
 from typing import Dict, Union
 from pydantic import BaseModel, Field
-from deepgram import Deepgram
 import nltk
 
 from services.youtube import youtube_video_download, get_video_information
 from configure import ASSEMBLY_AI_KEY, OPEN_AI_EMAIL, OPEN_AI_PASSWORD
 from services.assemblyai import upload_local_file, get_transcription, process_assembly_realtime
 from services.youtube import youtube_video_download 
-from services.deepgram import process_audio
-from configure import ASSEMBLY_AI_KEY, OPEN_AI_EMAIL, OPEN_AI_PASSWORD, DEEPGRAM_KEY
+from configure import ASSEMBLY_AI_KEY, OPEN_AI_EMAIL, OPEN_AI_PASSWORD
 
 app = FastAPI()
 app.add_middleware(
