@@ -10,6 +10,9 @@ module.exports = {
       },
       maxWidth: {
         "8xl": "1440px"
+      },
+      gridTemplateColumns: {
+        questions: "170px 1fr"
       }
     }
   },

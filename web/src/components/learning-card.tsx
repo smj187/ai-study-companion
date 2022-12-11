@@ -1,8 +1,13 @@
 import { useEffect, useState } from "react"
 import { useAppContext } from "../context/app-context"
+import { useStore } from "../store/store"
+import { AppQuestionModel } from "../types"
 
 interface Props {
   title?: string | null
+  activeQuestion: AppQuestionModel | null
+  decreaseIndex: () => void
+  increaseIndex: () => void
 }
 
 const Student = () => {
@@ -25,46 +30,37 @@ const Text: React.FC<{ text: string }> = ({ text }) => {
   return <span className="text-slate-500 w-full">{text}</span>
 }
 
-export const LearningCard: React.FC<Props> = ({ title = null }) => {
-  const { appQuestions, updateActiveQuestion } = useAppContext()
-
-  const [index, setIndex] = useState(0)
-
-  const decreaseIndex = () => {
-    if (index > 0) {
-      setIndex(index - 1)
-    }
-
-    updateActiveQuestion(appQuestions[index].id)
-  }
-
-  const increaseIndex = () => {
-    if (index + 1 < appQuestions.length) {
-      setIndex(index + 1)
-    }
-    updateActiveQuestion(appQuestions[index].id)
-  }
-
+export const LearningCard: React.FC<Props> = ({
+  title = null,
+  activeQuestion,
+  decreaseIndex,
+  increaseIndex
+}) => {
   const getActiveMessage = () => {
-    return appQuestions[index].question
+    return (
+      activeQuestion?.question ??
+      "There is no question available. Please upload one on the 'My Files' tap!"
+    )
   }
 
   const getUserAnswer = () => {
-    return appQuestions[index].userAnswer ?? null
+    return activeQuestion?.userAnswer ?? null
   }
 
   const getCorrectUserAnswer = () => {
     const correctAnswers = ["Good job!", "Nice one!", "This is correct!"]
-    const falseAnswers = ["Try again.", "This is not correct. Have another try!"]
-    const randomCorrectAnswer = correctAnswers[Math.floor(Math.random() * correctAnswers.length)]
-    const randomFalseAnswer = falseAnswers[Math.floor(Math.random() * falseAnswers.length)]
-    return appQuestions[index].answerIsCorrect ? randomCorrectAnswer : randomFalseAnswer
+    const falseAnswers = [
+      "Try again.",
+      "This is not correct. Have another try!"
+    ]
+    const randomCorrectAnswer =
+      correctAnswers[Math.floor(Math.random() * correctAnswers.length)]
+    const randomFalseAnswer =
+      falseAnswers[Math.floor(Math.random() * falseAnswers.length)]
+    return activeQuestion?.answerIsCorrect
+      ? randomCorrectAnswer
+      : randomFalseAnswer
   }
-
-  // on mount set the first question as the active quetion
-  useEffect(() => {
-    updateActiveQuestion(appQuestions[index].id)
-  }, [])
 
   const onLoadHelp = () => {
     console.log("TODO: add 'tell me more' here")
@@ -81,7 +77,7 @@ export const LearningCard: React.FC<Props> = ({ title = null }) => {
       <div className="flex flex-col space-y-3 w-full">
         <div className="w-full flex ">
           <Professor />
-          <span className="text-slate-500 w-full flex-1">
+          <span className="text-slate-500 w-full flex-1 pr-3">
             {getActiveMessage()}
           </span>
         </div>
@@ -115,7 +111,7 @@ export const LearningCard: React.FC<Props> = ({ title = null }) => {
             viewBox="0 0 24 24"
             strokeWidth={1.5}
             stroke="currentColor"
-            className="w-6 h-6"
+            className="w-6 h-6 text-gray-600 group-hover:text-gray-700"
           >
             <path
               strokeLinecap="round"

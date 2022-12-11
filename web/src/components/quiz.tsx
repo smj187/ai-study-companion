@@ -1,9 +1,25 @@
+import { AppQuestionModel } from "../types"
 import { LearningCard } from "./learning-card"
 
-export const Quiz: React.FC = () => {
+interface Props {
+  activeQuestion: AppQuestionModel | null
+  decreaseIndex: () => void
+  increaseIndex: () => void
+}
+
+export const Quiz: React.FC<Props> = ({
+  activeQuestion,
+  decreaseIndex,
+  increaseIndex
+}) => {
   return (
     <div>
-      <LearningCard title="Quiz" />
+      <LearningCard
+        title="Quiz"
+        activeQuestion={activeQuestion}
+        decreaseIndex={decreaseIndex}
+        increaseIndex={increaseIndex}
+      />
     </div>
   )
 }

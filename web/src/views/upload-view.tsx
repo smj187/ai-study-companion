@@ -9,6 +9,7 @@ import { AssemblyResponse } from "../types/assembly-types"
 
 import Lottie from "lottie-react"
 import upload from "../assets/upload.json"
+import Q_and_A from "../assets/Q_and_A.json"
 import { RemoteFile } from "../components/remote-file"
 import { FilePreview } from "../components/file-preview"
 import { Loading } from "../components/loading"
@@ -17,6 +18,7 @@ import { YouTubePreview } from "../components/youtube-preview"
 import { ChatGPTResponse } from "../types/openai-types"
 import { useAppContext } from "../context/app-context"
 import { useStore } from "../store/store"
+import { Generating } from "../components/generating"
 
 interface Questions {
   id: string
@@ -35,13 +37,17 @@ export const UploadView: React.FC = () => {
   // local file
   const [file, setFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
+  const [generateLocalQuestions, setGenerateLocalQuestions] = useState(false)
 
   // remote file
   const [loadingRemote, setLoadingRemote] = useState(false)
   const [remote, setRemote] = useState<string | null>(null)
+  const [generateRemoteQuestions, setQenerateRemoteQuestions] = useState(false)
 
   // youtube
   const [loadingYouTube, setLoadingYouTube] = useState(false)
+  const [generateYouTubeQuestions, setGenerateYouTubeQuestions] =
+    useState(false)
 
   // -> https://www.youtube.com/watch?v=6jA0xePC-pM
   const [youTubeVideoUrl, setYouTubeVideoUrl] = useState<string | null>(null)
@@ -51,16 +57,10 @@ export const UploadView: React.FC = () => {
 
   const [loadingQuestions, setLoadingQuestions] = useState(false)
 
-  // const [questions, setQuestions] = useLocalStorage<Array<Questions>>(
-  //   "questions",
-  //   []
-  // )
-
   let navigate = useNavigate()
 
   const generateQuestions = async (response: AssemblyResponse) => {
     console.info("generate questions...")
-    setLoadingQuestions(true)
 
     for (let i = 0; i < response.chapters.length; i++) {
       const url_question =
@@ -97,8 +97,6 @@ export const UploadView: React.FC = () => {
         response.chapters[i]["summary"],
         chatgpt_answer.message
       )
-
-      setLoadingQuestions(false)
     }
 
     // console.log(response.chapters)
@@ -145,85 +143,15 @@ export const UploadView: React.FC = () => {
     const request = await fetch(url)
 
     const response: AssemblyResponse = await request.json()
-    // console.log(response)
 
     setResult(response.chapters[0].summary)
 
-    generateQuestions(response)
+    setGenerateYouTubeQuestions(true)
+    await generateQuestions(response)
+    setGenerateYouTubeQuestions(false)
 
     setYouTubeVideoUrl(null)
     setLoadingYouTube(false)
-
-    // throw new Error("e")
-
-    // try {
-    //   let assembly_response: AssemblyResponse
-
-    //   if (youTubeVideoUrl !== null) {
-    //     console.info("process youtube link...")
-    //     console.info(youTubeVideoUrl)
-
-    //     const params = new URLSearchParams()
-    //     params.append("yt_url", youTubeVideoUrl)
-
-    //     const u = `${BASE_URL}/assembly/youtube?${params}`
-    //     console.log(u)
-
-    //     const url =
-    //       `${BASE_URL}/assembly/youtube?` +
-    //       new URLSearchParams({ yt_url: youTubeVideoUrl }).toString()
-    //     const assembly_data = await fetch(url)
-    //     assembly_response = await assembly_data.json()
-    //   } else {
-    //     const body = new FormData()
-    //     body.append("file", file)
-
-    //     console.info("upload file...")
-    //     const assembly_data = await fetch(`${BASE_URL}/assembly`, {
-    //       body,
-    //       method: "POST"
-    //     })
-    //     assembly_response = await assembly_data.json()
-    //   }
-
-    //   console.info("generate questions...")
-    //   for (let i = 0; i < assembly_response["chapters"].length; i++) {
-    //     const url_question =
-    //       `${BASE_URL}/chatgpt?` +
-    //       new URLSearchParams({
-    //         input_text: assembly_response["chapters"][i]["summary"],
-    //         generate_question: true
-    //       }).toString()
-
-    //     const chatgpt_question_data = await fetch(url_question)
-    //     const chatgpt_question = await chatgpt_question_data.json()
-
-    //     const url_answer =
-    //       `${BASE_URL}/chatgpt?` +
-    //       new URLSearchParams({
-    //         input_text: chatgpt_question["message"],
-    //         generate_question: false
-    //       }).toString()
-
-    //     const chatgpt_answer_data = await fetch(url_answer)
-    //     const chatgpt_answer = await chatgpt_answer_data.json()
-
-    //     questions.push({
-    //       id: i.toString(),
-    //       question: chatgpt_question["message"],
-    //       answer: chatgpt_answer["message"],
-    //       visibleAnswer: false,
-    //       voiceInputFile: null,
-    //       voiceInputUrl: null
-    //     })
-    //   }
-
-    //   setResult(assembly_response["chapters"][0]["summary"])
-    //   setLoadingYouTube(false)
-    // } catch (e) {
-    //   console.error(e)
-    //   // TODO alert: something went wrong, please try again...
-    // }
   }
 
   const onRemoteFileUpload = async () => {
@@ -254,7 +182,9 @@ export const UploadView: React.FC = () => {
 
     setResult(response.chapters[0].summary)
 
-    generateQuestions(response)
+    setQenerateRemoteQuestions(true)
+    await generateQuestions(response)
+    setQenerateRemoteQuestions(false)
 
     setRemote(null)
     setLoadingRemote(false)
@@ -282,7 +212,9 @@ export const UploadView: React.FC = () => {
 
     setResult(response.chapters[0].summary)
 
-    generateQuestions(response)
+    setGenerateLocalQuestions(true)
+    await generateQuestions(response)
+    setGenerateLocalQuestions(false)
 
     setLoading(false)
     setFile(null)
@@ -314,91 +246,134 @@ export const UploadView: React.FC = () => {
       <div className="flex flex-col ">
         <div className="grid grid-cols-3 gap-6">
           <InputForm title="From Local File" withPointer={file === null}>
-            {loadingQuestions === false && file === null && (
+            {generateLocalQuestions === false && file === null && (
               <FileUpload setFile={setFile} />
             )}
             {file !== null && loading === false && (
               <FilePreview fileName={file.name} onClick={onLocalFileUpload} />
             )}
-            {loading && <Loading text="Process Local File..." />}
+            {loading && generateLocalQuestions === false && (
+              <Loading text="Process Local File..." />
+            )}
 
-            {loadingQuestions && <Loading text="Generate Questions..." />}
+            {generateLocalQuestions && <Generating />}
           </InputForm>
 
           <InputForm title="From YouTube Video" withPointer={false}>
-            {loadingQuestions === false && youTubeVideoUrl === null && (
+            {generateYouTubeQuestions === false && youTubeVideoUrl === null && (
               <YouTubeVideo setYouTubeUrl={setYouTubeVideoUrl} />
             )}
             {youTubeVideoUrl !== null && loadingYouTube === false && (
               <YouTubePreview onClick={onYouTubeUpload} />
             )}
-            {loadingYouTube && <Loading text="Process YouTube Video..." />}
 
-            {loadingQuestions && <Loading text="Generate Questions..." />}
+            {loadingYouTube && generateYouTubeQuestions === false && (
+              <Loading text="Process Remote File..." />
+            )}
+
+            {generateYouTubeQuestions && <Generating />}
           </InputForm>
 
           <InputForm title="From Remote File" withPointer={false}>
-            {loadingQuestions === false && remote === null && (
+            {generateRemoteQuestions === false && remote === null && (
               <RemoteFile setFileUrl={setRemote} />
             )}
             {remote !== null && loadingRemote === false && (
               <RemotePreview onClick={onRemoteFileUpload} />
             )}
 
-            {loadingRemote && <Loading text="Process Remote File..." />}
+            {loadingRemote && generateRemoteQuestions == false && (
+              <Loading text="Process Remote File..." />
+            )}
 
-            {loadingQuestions && <Loading text="Generate Questions..." />}
+            {generateRemoteQuestions && <Generating />}
           </InputForm>
         </div>
 
         <div className="text-center pt-16">
-          {result && !loadingQuestions && (
+          {result && !generateYouTubeQuestions && (
             <div className="text-slate-600">
               Head over to the learning tab or add another resource!
             </div>
           )}
         </div>
 
-        <div className="relative flex flex-col w-full min-h-[500px] overflow-y-auto bg-white rounded-md py-3 mt-16 mb-44">
-          <div className="w-full flex px-9 py-3 border-b border-slate-300">
-            <span className="font-bold text-rose-500 pr-3 w-full flex-1 text-left">
-              Question
-            </span>
-            <span className="text-slate-500 w-full flex-1">Answer</span>
-          </div>
+        <div className="relative flex flex-col w-full min-h-[500px] overflow-y-auto space-y-3 py-3 mt-16 mb-44">
           {store.questions.map(q => {
             return (
               <div
-                className="w-full flex pl-9 py-3 pr-3 border-b border-slate-300/30"
                 key={q.id}
+                className="w-full grid grid-cols-questions p-6 border-b border-slate-300/30 bg-white rounded-md"
               >
-                <div className=" pr-3 w-full flex-1">
-                  <span className="font-bold text-rose-500 text-left">
-                    {q.question}
-                  </span>
+                <div className="text-rose-600 font-bold">Question</div>
+                <div>{q.question}</div>
+
+                <div className="text-slate-600 mt-3">Suggested Answer</div>
+                <div className="text-slate-600 mt-3">{q.chatGptAnswer}</div>
+
+                <div className="text-rose-600 font-bold mt-3">My Answer</div>
+                <div className="text-slate-600 mt-3">
+                  {q.userAnswer === null ? (
+                    <span className="text-slate-400 italic">
+                      not answered yet
+                    </span>
+                  ) : (
+                    <>
+                      <span>{q.userAnswer}</span>
+                      <span className="text-slate-400 pl-1">
+                        {q.answerIsCorrect
+                          ? "(this answer is correct)"
+                          : "(this answer is not correct)"}
+                      </span>
+                    </>
+                  )}
                 </div>
-                <span className="text-slate-500 w-full flex-1 px-3">
-                  {q.chatGptAnswer}
-                </span>
-                <button
-                  onClick={() => store.removeQuestion(q.id)}
-                  className="w-12 h-12 grid place-content-center rounded hover:bg-slate-100 hover:bg-opacity-50 pointer text-slate-300 hover:text-rose-500"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="w-6 h-6"
+
+                <div className="col-span-2 mt-3 flex justify-end space-x-3">
+                  {q.userAnswer !== null && (
+                    <button
+                      onClick={() => store.removeUserAnswer(q.id)}
+                      className="group hover:bg-slate-50 hover:border-slate-50 hover:text-slate-600 border-slate-200/200 border cursor-pointer hover:border-opacity-30 rounded h-10 inline-flex text-slate-400 text-sm uppercase items-center w-[240px] justify-center"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="w-5 h-5"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"
+                        />
+                      </svg>
+
+                      <span className="pl-2">remove my answer</span>
+                    </button>
+                  )}
+                  <button
+                    onClick={() => store.removeQuestion(q.id)}
+                    className="group hover:bg-slate-50 hover:border-slate-50 hover:text-slate-600 border-slate-200/200 border cursor-pointer hover:border-opacity-30 rounded h-10 inline-flex text-slate-400 text-sm uppercase items-center w-[240px] justify-center"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="w-5 h-5"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                    <span className="pl-1">remove this question</span>
+                  </button>
+                </div>
               </div>
             )
           })}
