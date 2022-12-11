@@ -47,6 +47,8 @@ export const UploadView: React.FC = () => {
   const [answers, setAnswers] = useState<[string] | null>(null)
   const [error, setError] = useState<string | null>(null)
 
+  const [loadingQuestions, setLoadingQuestions] = useState(false)
+
   const { appQuestions, addQuestion } = useAppContext()
 
   // const [questions, setQuestions] = useLocalStorage<Array<Questions>>(
@@ -58,6 +60,7 @@ export const UploadView: React.FC = () => {
 
   const generateQuestions = async (response: AssemblyResponse) => {
     console.info("generate questions...")
+    setLoadingQuestions(true)
 
     for (let i = 0; i < response.chapters.length; i++) {
       const url_question =
@@ -83,7 +86,8 @@ export const UploadView: React.FC = () => {
       const chatgpt_answer: ChatGPTResponse = await chatgpt_answer_data.json()
       console.log("chatgpt_answer", chatgpt_answer)
 
-      addQuestion(chatgpt_question.message, chatgpt_answer.message)
+      addQuestion(chatgpt_question.message, response.chapters[i]["summary"], chatgpt_answer.message)
+      setLoadingQuestions(false)
     }
 
     // console.log(response.chapters)
@@ -301,7 +305,7 @@ export const UploadView: React.FC = () => {
             {file !== null && loading === false && (
               <FilePreview fileName={file.name} onClick={onLocalFileUpload} />
             )}
-            {loading && <Loading />}
+            {loading && <Loading text="Process Local File..."/>}
           </InputForm>
 
           <InputForm title="From YouTube Video" withPointer={false}>
@@ -311,7 +315,7 @@ export const UploadView: React.FC = () => {
             {youTubeVideoUrl !== null && loadingYouTube === false && (
               <YouTubePreview onClick={onYouTubeUpload} />
             )}
-            {loadingYouTube && <Loading />}
+            {loadingYouTube && <Loading text="Process YouTube Video..."/>}
           </InputForm>
 
           <InputForm title="From Remote File" withPointer={false}>
@@ -320,11 +324,11 @@ export const UploadView: React.FC = () => {
               <RemotePreview onClick={onRemoteFileUpload} />
             )}
 
-            {loadingRemote && <Loading />}
-          </InputForm>
+            {loadingRemote && <Loading text="Process Remote File..."/>}
+          </InputForm>       
+          {loadingQuestions && <Loading text="Generate Questions..."/>}
+          {result && !loadingQuestions && <div>Head over to the learning tab!</div>}
         </div>
-
-        <div>{result && <div> Summary (1. Chapter): {result} </div>}</div>
 
         <div className="relative flex flex-col w-full h-[500px] overflow-y-auto bg-white rounded-md py-3 mt-32">
           {appQuestions.map(q => {

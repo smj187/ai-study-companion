@@ -54,7 +54,11 @@ export const LearningCard: React.FC<Props> = ({ title = null }) => {
   }
 
   const getCorrectUserAnswer = () => {
-    return appQuestions[index].answerIsCorrect ? "good job" : "learn more"
+    const correctAnswers = ["Good job!", "Nice one!", "This is correct!"]
+    const falseAnswers = ["Try again.", "This is not correct. Have another try!"]
+    const randomCorrectAnswer = correctAnswers[Math.floor(Math.random() * correctAnswers.length)]
+    const randomFalseAnswer = falseAnswers[Math.floor(Math.random() * falseAnswers.length)]
+    return appQuestions[index].answerIsCorrect ? randomCorrectAnswer : randomFalseAnswer
   }
 
   // on mount set the first question as the active quetion

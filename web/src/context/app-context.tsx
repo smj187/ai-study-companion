@@ -20,9 +20,9 @@ interface IAppContext {
 
   // app question
   appQuestions: Array<AppQuestionModel>
-  addQuestion: (newQuestion: string, chatGptAnswer: string) => void
+  addQuestion: (newQuestion: string, assemblyAnswer: string, chatGptAnswer: string) => void
   removeQuestion: (id: string) => void
-  addUserAnswer: (id: string, userAnswer: string) => void
+  addUserAnswer: (id: string, userAnswer: string, correct: boolean) => void
 
   // TODO: delete this stuff
   questions: Array<Questions>
@@ -46,7 +46,8 @@ export function AppContextProvider({
   const [appQuestions, setAppQuestions] = useState<Array<AppQuestionModel>>([
     {
       id: nanoid(),
-      chatGptAnswer: "<chat gpt answer>",
+      assemblyAnswer: "Answer Assembly",
+      chatGptAnswer: "Answer GPT",
       userAnswer: null,
       question:
         "What is the approach that wealthy individuals take when considering large purchases?",
@@ -54,7 +55,8 @@ export function AppContextProvider({
     },
     {
       id: nanoid(),
-      chatGptAnswer: "3 ??",
+      assemblyAnswer: "This should be 2.",
+      chatGptAnswer: "Could be 3.",
       userAnswer: null,
       question: "What is 1+1 ?",
       answerIsCorrect: null
@@ -70,10 +72,11 @@ export function AppContextProvider({
   }
 
   // adds a new question to the context store
-  function addQuestion(newQuestion: string, chatGptAnswer: string) {
+  function addQuestion(newQuestion: string, assemblyAnswer: string, chatGptAnswer: string) {
     const appQuestion: AppQuestionModel = {
       id: nanoid(),
       question: newQuestion,
+      assemblyAnswer: assemblyAnswer,
       chatGptAnswer: chatGptAnswer,
       userAnswer: null,
       answerIsCorrect: null
@@ -90,7 +93,7 @@ export function AppContextProvider({
   }
 
   // tries to add a user generated answer to a question object
-  function addUserAnswer(id: string, userAnswer: string) {
+  function addUserAnswer(id: string, userAnswer: string, correct: boolean) {
     setAppQuestions([
       ...appQuestions.map(appQuestion => {
         if (appQuestion.id === id) {
@@ -99,7 +102,7 @@ export function AppContextProvider({
           return {
             ...appQuestion,
             userAnswer: userAnswer,
-            answerIsCorrect: true // TODO: how to check if answer is correct ??
+            answerIsCorrect: correct
           }
         }
         return appQuestion

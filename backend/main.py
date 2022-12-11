@@ -112,8 +112,9 @@ async def process_chatgpt(input_text: str, generate_question: bool):
 
 
 @app.get("/validate")
-async def validate_answer(input_answer: str, ground_truth1: str, ground_truth2: str, threshold: float = 0.4):
+async def validate_answer(input_answer: str, ground_truth1: str, ground_truth2: str, threshold: float = 0.45):
     score = nltk.translate.bleu_score.sentence_bleu([ground_truth1, ground_truth2], input_answer, weights = [1])
+    print("correctness score:", score)
     return score >= threshold
 
 
