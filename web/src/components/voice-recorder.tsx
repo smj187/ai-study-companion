@@ -8,7 +8,7 @@ import { AppQuestionModel } from "../types"
 import { AssemblyResponse } from "../types/assembly-types"
 import "./wave.css"
 
-const BASE_URL = "http://localhost:8000"
+const BASE_URL = import.meta.env.VITE_BASE_URL
 
 interface Props {
   activeQuestion: AppQuestionModel | null

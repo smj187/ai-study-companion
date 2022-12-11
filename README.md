@@ -8,8 +8,8 @@
 - [ ] meaningful error messages for all input operations
 - [ ] backend server url in .env file inside the web app
 - [ ] tooltips for better usability understanding
-- [ ] change app context (bugs) with react zustand https://www.youtube.com/watch?v=sqTPGMipjHk
-- [ ] clean up + reafactor upload-view.tsx
+- [x] change app context (bugs) with react zustand https://www.youtube.com/watch?v=sqTPGMipjHk
+- [x] clean up + reafactor upload-view.tsx
 ```
 
 ## run local docker
