@@ -44,7 +44,6 @@ export const UploadView: React.FC = () => {
   const [youTubeVideoUrl, setYouTubeVideoUrl] = useState<string | null>(null)
 
   const [result, setResult] = useState<string | null>(null)
-  const [answers, setAnswers] = useState<[string] | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const [loadingQuestions, setLoadingQuestions] = useState(false)
@@ -283,12 +282,10 @@ export const UploadView: React.FC = () => {
     <div className="flex flex-col space-y-9 font-inter">
       <div className="pb-5 border-b border-gray-200">
         <h3 className="text-lg leading-6 font-medium text-gray-900">
-          Upload Your Notes
+          Upload Media
         </h3>
         <p className="mt-2 max-w-4xl text-sm text-gray-500">
-          Upload your notes to lorem ipsum dolor sit amet, consetetur sadipscing
-          elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore
-          magna aliquyam erat, sed diam voluptua.
+          Professor.ai will analyze the provided video and automatically extract important and interesting questions. Of course this also includes the answer to them. 
         </p>
       </div>
 
