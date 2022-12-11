@@ -4,7 +4,7 @@ from revChatGPT.revChatGPT import Chatbot
 from typing import Dict, Union
 from pydantic import BaseModel, Field
 from deepgram import Deepgram
-
+import nltk
 
 from services.youtube import youtube_video_download, get_video_information
 from configure import ASSEMBLY_AI_KEY, OPEN_AI_EMAIL, OPEN_AI_PASSWORD
@@ -111,33 +111,10 @@ async def process_chatgpt(input_text: str, generate_question: bool):
     return response
 
 
-@app.websocket("/listen")
-async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
-
-    try:
-        dg_client = Deepgram(DEEPGRAM_KEY)
-        deepgram_socket = await process_audio(websocket, dg_client) 
-
-        while True:
-            data = await websocket.receive_bytes()
-            deepgram_socket.send(data)
-    except Exception as e:
-        raise Exception(f'Could not process audio: {e}')
-    finally:
-        await websocket.close()
-
-# TODO wait for multiple stream allowance
-'''@app.websocket("/listen")
-async def realtime_websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
-    try:
-        process_assembly_realtime(websocket, ASSEMBLY_AI_KEY)
-    except Exception as e:
-        raise Exception(f'Could not process audio: {e}')
-    finally:
-        await websocket.close()'''
-    
+@app.get("/validate")
+async def validate_answer(input_answer: str, ground_truth1: str, ground_truth2: str, threshold: float = 0.4):
+    score = nltk.translate.bleu_score.sentence_bleu([ground_truth1, ground_truth2], input_answer, weights = [1])
+    return score >= threshold
 
 
 @app.get("/")
