@@ -2,7 +2,7 @@ backend/assets/*
 # python
 backend-env
 secrets.py
-
+configure.py
 *.m4a
 
 # Logs
