@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
 import { useAppContext } from "../context/app-context"
+import { PopUp } from "../components/popup"
 import { useStore } from "../store/store"
 import { AppQuestionModel } from "../types"
-
 interface Props {
   title?: string | null
   activeQuestion: AppQuestionModel | null
@@ -62,10 +62,6 @@ export const LearningCard: React.FC<Props> = ({
       : randomFalseAnswer
   }
 
-  const onLoadHelp = () => {
-    console.log("TODO: add 'tell me more' here")
-  }
-
   return (
     <div className="relative flex justify-center items-center w-full h-[500px] bg-white rounded-md">
       {title !== null && (
@@ -101,25 +97,7 @@ export const LearningCard: React.FC<Props> = ({
 
       {/* navigation buttons */}
       <div className="absolute bottom-1 right-1 flex space-x-1 items-center">
-        <button
-          onClick={onLoadHelp}
-          className="group hover:bg-slate-200/40 cursor-pointer hover:border-opacity-30 rounded h-12 w-12 grid place-items-center"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="w-6 h-6 text-gray-600 group-hover:text-gray-700"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"
-            />
-          </svg>
-        </button>
+        <PopUp title="Answer" text="Generate Questions...TODO" />
 
         <span className="text-slate-300 px-3">|</span>
 
