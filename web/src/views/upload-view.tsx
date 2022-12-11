@@ -29,10 +29,12 @@ interface Questions {
   voiceInputUrl: string | null
 }
 
-const BASE_URL = "http://localhost:8000"
+const BASE_URL = import.meta.env.VITE_BASE_URL
 
 export const UploadView: React.FC = () => {
   const store = useStore()
+
+  console.log(BASE_URL)
 
   // local file
   const [file, setFile] = useState<File | null>(null)
