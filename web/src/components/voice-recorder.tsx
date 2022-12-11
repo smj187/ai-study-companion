@@ -8,7 +8,10 @@ import { AppQuestionModel } from "../types"
 import { AssemblyResponse } from "../types/assembly-types"
 import "./wave.css"
 
-const BASE_URL = import.meta.env.VITE_BASE_URL
+const BASE_URL =
+  import.meta.env.MODE === "production"
+    ? import.meta.env.VITE_BASE_URL_PRODUCTION
+    : import.meta.env.VITE_BASE_URL_DEVELOPMENT
 
 interface Props {
   activeQuestion: AppQuestionModel | null

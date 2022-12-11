@@ -12,6 +12,6 @@ RUN pnpm install esbuild
 
 COPY . .
 
-EXPOSE 3000
+EXPOSE 8080
 
-CMD ["pnpm", "build"]
+CMD ["pnpm", "preview"]

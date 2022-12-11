@@ -7,8 +7,17 @@ import { Quiz } from "../components/quiz"
 import { AppQuestionModel } from "../types"
 import { useStore } from "../store/store"
 
+const BASE_URL =
+  import.meta.env.MODE === "production"
+    ? import.meta.env.VITE_BASE_URL_PRODUCTION
+    : import.meta.env.VITE_BASE_URL_DEVELOPMENT
+
 export const AppView: React.FC = () => {
   const store = useStore()
+
+  fetch(BASE_URL)
+    .then(r => r.json())
+    .then(r => console.log(r))
 
   const [activeQuestion, setActiveQuestion] = useState<AppQuestionModel | null>(
     () => {

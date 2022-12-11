@@ -29,12 +29,13 @@ interface Questions {
   voiceInputUrl: string | null
 }
 
-const BASE_URL = import.meta.env.VITE_BASE_URL
+const BASE_URL =
+  import.meta.env.MODE === "production"
+    ? import.meta.env.VITE_BASE_URL_PRODUCTION
+    : import.meta.env.VITE_BASE_URL_DEVELOPMENT
 
 export const UploadView: React.FC = () => {
   const store = useStore()
-
-  console.log(BASE_URL)
 
   // local file
   const [file, setFile] = useState<File | null>(null)
@@ -222,10 +223,6 @@ export const UploadView: React.FC = () => {
     setFile(null)
   }
 
-  useEffect(() => {
-    console.log(youTubeVideoUrl)
-  }, [youTubeVideoUrl])
-
   return (
     <div className="flex flex-col space-y-9 font-inter">
       <div className="pb-5 border-b border-gray-200">
@@ -233,8 +230,9 @@ export const UploadView: React.FC = () => {
           Upload Media
         </h3>
         <p className="mt-2 max-w-4xl text-gray-500">
-          Professor.ai analyses the provided video/audio and automatically generates
-          individual questions. In the learning tab you can test your knowledge!
+          Professor.ai analyses the provided video/audio and automatically
+          generates individual questions. In the learning tab you can test your
+          knowledge!
         </p>
       </div>
 

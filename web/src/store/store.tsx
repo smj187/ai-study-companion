@@ -24,7 +24,16 @@ type Store = {
 export const useStore = create(
   persist<Store>(
     (set, get) => ({
-      questions: [],
+      questions: [
+        {
+          id: nanoid(),
+          question: "What is 1+1?",
+          userAnswer: null,
+          assemblyAnswer: "2",
+          chatGptAnswer: "2",
+          answerIsCorrect: null
+        }
+      ],
       removeUserAnswer: (id: string) => {
         set(state => ({
           ...state,
