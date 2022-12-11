@@ -16,6 +16,7 @@ import { RemotePreview } from "../components/remote-preview"
 import { YouTubePreview } from "../components/youtube-preview"
 import { ChatGPTResponse } from "../types/openai-types"
 import { useAppContext } from "../context/app-context"
+import { useStore } from "../store/store"
 
 interface Questions {
   id: string
@@ -29,6 +30,8 @@ interface Questions {
 const BASE_URL = "http://localhost:8000"
 
 export const UploadView: React.FC = () => {
+  const store = useStore()
+
   // local file
   const [file, setFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
@@ -47,8 +50,6 @@ export const UploadView: React.FC = () => {
   const [error, setError] = useState<string | null>(null)
 
   const [loadingQuestions, setLoadingQuestions] = useState(false)
-
-  const { appQuestions, addQuestion } = useAppContext()
 
   // const [questions, setQuestions] = useLocalStorage<Array<Questions>>(
   //   "questions",
@@ -85,7 +86,18 @@ export const UploadView: React.FC = () => {
       const chatgpt_answer: ChatGPTResponse = await chatgpt_answer_data.json()
       console.log("chatgpt_answer", chatgpt_answer)
 
-      addQuestion(chatgpt_question.message, response.chapters[i]["summary"], chatgpt_answer.message)
+      // addQuestion(
+      //   chatgpt_question.message,
+      //   response.chapters[i]["summary"],
+      //   chatgpt_answer.message
+      // )
+
+      store.addQuestion(
+        chatgpt_question.message,
+        response.chapters[i]["summary"],
+        chatgpt_answer.message
+      )
+
       setLoadingQuestions(false)
     }
 
@@ -216,6 +228,7 @@ export const UploadView: React.FC = () => {
 
   const onRemoteFileUpload = async () => {
     setLoadingRemote(true)
+    setResult(null)
     if (remote === null) {
       setError("pls provide a remote url before continiuing")
       return
@@ -249,6 +262,7 @@ export const UploadView: React.FC = () => {
 
   const onLocalFileUpload = async () => {
     setLoading(true)
+    setResult(null)
     if (file === null) {
       setError("pls provide a file before continiuing")
       return
@@ -284,8 +298,10 @@ export const UploadView: React.FC = () => {
         <h3 className="text-lg leading-6 font-medium text-gray-900">
           Upload Media
         </h3>
-        <p className="mt-2 max-w-4xl text-sm text-gray-500">
-          Professor.ai will analyze the provided video and automatically extract important and interesting questions. Of course this also includes the answer to them. 
+        <p className="mt-2 max-w-4xl text-gray-500">
+          Professor.ai will analyze the provided video and automatically extract
+          important and interesting questions. Of course this also includes the
+          answer to them.
         </p>
       </div>
 
@@ -298,45 +314,91 @@ export const UploadView: React.FC = () => {
       <div className="flex flex-col ">
         <div className="grid grid-cols-3 gap-6">
           <InputForm title="From Local File" withPointer={file === null}>
-            {file === null && <FileUpload setFile={setFile} />}
+            {loadingQuestions === false && file === null && (
+              <FileUpload setFile={setFile} />
+            )}
             {file !== null && loading === false && (
               <FilePreview fileName={file.name} onClick={onLocalFileUpload} />
             )}
-            {loading && <Loading text="Process Local File..."/>}
+            {loading && <Loading text="Process Local File..." />}
+
+            {loadingQuestions && <Loading text="Generate Questions..." />}
           </InputForm>
 
           <InputForm title="From YouTube Video" withPointer={false}>
-            {youTubeVideoUrl === null && (
+            {loadingQuestions === false && youTubeVideoUrl === null && (
               <YouTubeVideo setYouTubeUrl={setYouTubeVideoUrl} />
             )}
             {youTubeVideoUrl !== null && loadingYouTube === false && (
               <YouTubePreview onClick={onYouTubeUpload} />
             )}
-            {loadingYouTube && <Loading text="Process YouTube Video..."/>}
+            {loadingYouTube && <Loading text="Process YouTube Video..." />}
+
+            {loadingQuestions && <Loading text="Generate Questions..." />}
           </InputForm>
 
           <InputForm title="From Remote File" withPointer={false}>
-            {remote === null && <RemoteFile setFileUrl={setRemote} />}
+            {loadingQuestions === false && remote === null && (
+              <RemoteFile setFileUrl={setRemote} />
+            )}
             {remote !== null && loadingRemote === false && (
               <RemotePreview onClick={onRemoteFileUpload} />
             )}
 
-            {loadingRemote && <Loading text="Process Remote File..."/>}
-          </InputForm>       
-          {loadingQuestions && <Loading text="Generate Questions..."/>}
-          {result && !loadingQuestions && <div>Head over to the learning tab!</div>}
+            {loadingRemote && <Loading text="Process Remote File..." />}
+
+            {loadingQuestions && <Loading text="Generate Questions..." />}
+          </InputForm>
         </div>
 
-        <div className="relative flex flex-col w-full h-[500px] overflow-y-auto bg-white rounded-md py-3 mt-32">
-          {appQuestions.map(q => {
+        <div className="text-center pt-16">
+          {result && !loadingQuestions && (
+            <div className="text-slate-600">
+              Head over to the learning tab or add another resource!
+            </div>
+          )}
+        </div>
+
+        <div className="relative flex flex-col w-full min-h-[500px] overflow-y-auto bg-white rounded-md py-3 mt-16 mb-44">
+          <div className="w-full flex px-9 py-3 border-b border-slate-300">
+            <span className="font-bold text-rose-500 pr-3 w-full flex-1 text-left">
+              Question
+            </span>
+            <span className="text-slate-500 w-full flex-1">Answer</span>
+          </div>
+          {store.questions.map(q => {
             return (
-              <div className="w-full flex" key={q.id}>
-                <span className="font-bold text-rose-500 pr-3 w-full flex-1  text-right">
-                  {q.question}
-                </span>
-                <span className="text-slate-500 w-full flex-1">
+              <div
+                className="w-full flex pl-9 py-3 pr-3 border-b border-slate-300/30"
+                key={q.id}
+              >
+                <div className=" pr-3 w-full flex-1">
+                  <span className="font-bold text-rose-500 text-left">
+                    {q.question}
+                  </span>
+                </div>
+                <span className="text-slate-500 w-full flex-1 px-3">
                   {q.chatGptAnswer}
                 </span>
+                <button
+                  onClick={() => store.removeQuestion(q.id)}
+                  className="w-12 h-12 grid place-content-center rounded hover:bg-slate-100 hover:bg-opacity-50 pointer text-slate-300 hover:text-rose-500"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="w-6 h-6"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
               </div>
             )
           })}
