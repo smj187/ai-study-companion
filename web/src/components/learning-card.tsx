@@ -39,7 +39,7 @@ export const LearningCard: React.FC<Props> = ({
   const getActiveMessage = () => {
     return (
       activeQuestion?.question ??
-      "There is no question available. Please upload one on the 'My Files' tap!"
+      "There is no question available. Automatically generate one via the 'My Files' tab!"
     )
   }
 
@@ -52,18 +52,9 @@ export const LearningCard: React.FC<Props> = ({
   }
 
   const getCorrectUserAnswer = () => {
-    const correctAnswers = ["Good job!", "Nice one!", "This is correct!"]
-    const falseAnswers = [
-      "Try again.",
-      "This is not correct. Have another try!"
-    ]
-    const randomCorrectAnswer =
-      correctAnswers[Math.floor(Math.random() * correctAnswers.length)]
-    const randomFalseAnswer =
-      falseAnswers[Math.floor(Math.random() * falseAnswers.length)]
     return activeQuestion?.answerIsCorrect
-      ? randomCorrectAnswer
-      : randomFalseAnswer
+      ? "This is correct!"
+      : "This is not completely correct. Have another try!"
   }
 
   return (

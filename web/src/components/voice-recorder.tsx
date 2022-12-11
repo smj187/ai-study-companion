@@ -139,6 +139,7 @@ export const VoiceRecorder: React.FC<Props> = ({
   const onCheckAnswer = async () => {
     setLoadingValidation(true)
     console.info("check answer...")
+
     // convert object url to file
     if (audioFileUrl === null) {
       setError("pls provide a spoken answer using the microphone button")
@@ -149,6 +150,11 @@ export const VoiceRecorder: React.FC<Props> = ({
       setError("there is no question set, pls upload one")
       return
     }
+
+    // TODO remove previous answer and rerender???
+    //store.removeUserAnswer(activeQuestion.id)
+    //useForceUpdate()// ugly hack
+
     const audioBlob = await fetch(audioFileUrl).then(r => r.blob())
     const audioFile = new File([audioBlob], "tmp.mp3", { type: "audio/mpeg" })
 

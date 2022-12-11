@@ -79,7 +79,7 @@ export const useStore = create(
           questions: [
             ...state.questions.map(q => {
               if (q.id === id) {
-                console.log("add user msg lol", userAnswer)
+                console.log("add user msg:", userAnswer)
 
                 return {
                   ...q,

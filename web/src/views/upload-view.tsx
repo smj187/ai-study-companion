@@ -233,9 +233,8 @@ export const UploadView: React.FC = () => {
           Upload Media
         </h3>
         <p className="mt-2 max-w-4xl text-gray-500">
-          Professor.ai analyses the provided video and automatically extracts
-          important and interesting questions. Of course this also includes the
-          correct answer to them!
+          Professor.ai analyses the provided video/audio and automatically generates
+          individual questions. In the learning tab you can test your knowledge!
         </p>
       </div>
 
@@ -270,7 +269,7 @@ export const UploadView: React.FC = () => {
             )}
 
             {loadingYouTube && generateYouTubeQuestions === false && (
-              <Loading text="Process Remote File..." />
+              <Loading text="Process Video..." />
             )}
 
             {generateYouTubeQuestions && <Generating />}
@@ -311,7 +310,7 @@ export const UploadView: React.FC = () => {
                 <div>{q.question}</div>
 
                 <div className="text-slate-600 mt-3">Suggested Answer</div>
-                <div className="text-slate-600 mt-3">{q.chatGptAnswer}</div>
+                <div className="text-slate-600 mt-3">{q.assemblyAnswer}</div>
 
                 <div className="text-rose-600 font-bold mt-3">My Answer</div>
                 <div className="text-slate-600 mt-3">
