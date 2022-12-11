@@ -14,6 +14,7 @@ TRANSCRIPTION_ENDPOINT = "https://api.assemblyai.com/v2/transcript"
 REALTIME_ENDPOINT = "wss://api.assemblyai.com/v2/realtime/ws?sample_rate=16000"
 CHUNK_SIZE = 5_242_880  # 5MB
 
+
 # upload local file to assembly ai backend
 # https://www.assemblyai.com/docs/walkthroughs#uploading-local-files-for-transcription
 def upload_local_file(file: any, x_api_key: str) -> str:

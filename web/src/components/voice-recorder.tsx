@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { twMerge } from "tailwind-merge"
 import { useVoiceRecorder } from "use-voice-recorder"
 import WaveSurfer from "wavesurfer.js"
+import { useAppContext } from "../context/app-context"
 import "./wave.css"
 
 interface Props {}
@@ -15,6 +16,8 @@ export const VoiceRecorder: React.FC<Props> = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const audioListRef = useRef<HTMLDivElement | null>(null)
   const [reset, setReset] = useState(false)
+
+  const { addUserAnswer, currentlyActiveQuestionId } = useAppContext()
 
   useEffect(() => {
     if (audioFileUrl !== null) {
@@ -121,12 +124,21 @@ export const VoiceRecorder: React.FC<Props> = () => {
   const onCheckAnser = () => {
     console.log("local file -> ", audioFileUrl)
 
+    // TODO: https://www.assemblyai.com/docs/walkthroughs#getting-the-transcription-result
+    // transcription
+
+    addUserAnswer(
+      currentlyActiveQuestionId!,
+      "TODO: handle assembly AI stuff here"
+    )
+
     console.log("TODO: handle assembly AI stuff here")
   }
 
   return (
     <div className="mb-96">
       <div>
+        {currentlyActiveQuestionId}
         {/* record button */}
         <div className="m-9 bg-white rounded relative p-3 flex w-full max-w-md justify-between mx-auto">
           <div className="h-12 w-12">

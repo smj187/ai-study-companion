@@ -11,10 +11,10 @@ export const Header = () => {
   const [selected, setSelected] = useState(useLocation().pathname)
 
   return (
-    <Disclosure as="nav" className=" shadow fixed w-full">
+    <Disclosure as="nav" className=" shadow fixed w-full z-50 bg-white">
       {({ open, close }) => (
         <>
-          <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-8xl mx-auto">
             <div className="flex justify-between h-16">
               <div className="flex items-center ">
                 <div className="flex-shrink-0 flex items-center h-14 px-3 rounded">
@@ -98,7 +98,8 @@ export const Header = () => {
                       My Files
                     </NavLink>
                   </li>
-                  <li className="mr-2">
+
+                  {/* <li className="mr-2">
                     <NavLink
                       onClick={() => setSelected("/realtime")}
                       to={`/realtime`}
@@ -110,7 +111,7 @@ export const Header = () => {
                     >
                       Realtime
                     </NavLink>
-                  </li>
+                  </li> */}
                 </ul>
               </div>
 

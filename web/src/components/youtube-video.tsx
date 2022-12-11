@@ -1,10 +1,10 @@
 import React, { useState } from "react"
 
 interface Props {
-  setYouTubeUrl: (value: React.SetStateAction<String | null>) => void
+  setYouTubeUrl: (value: React.SetStateAction<string | null>) => void
 }
 
-export const YouTubeVideo: React.FC<Props> = ({setYouTubeUrl}) => {
+export const YouTubeVideo: React.FC<Props> = ({ setYouTubeUrl }) => {
   const [v, setV] = useState("")
 
   const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -16,11 +16,9 @@ export const YouTubeVideo: React.FC<Props> = ({setYouTubeUrl}) => {
     const match = event.target.value.match(regExp)
 
     if (match && match[7].length === 11) {
-      console.log(match[7])
-      console.log(`'https://img.youtube.com/vi/${match[7]}/maxresdefault.jpg'`)
+      // console.log(match[7])
     }
     setYouTubeUrl(event.target.value)
-    console.log(event.target.value)
   }
   return (
     <div className="w-full h-full flex flex-col space-y-3 justify-center items-center">

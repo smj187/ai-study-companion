@@ -1,10 +1,21 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { FileUpload } from "../components/file-upload"
 import { TextField } from "../components/text-field"
 import { YouTubeVideo } from "../components/youtube-video"
 import { useNavigate } from "react-router-dom"
 import { InputForm } from "../components/input-form"
 import { useLocalStorage } from "../hooks/useLocalStorage"
+import { AssemblyResponse } from "../types/assembly-types"
+
+import Lottie from "lottie-react"
+import upload from "../assets/upload.json"
+import { RemoteFile } from "../components/remote-file"
+import { FilePreview } from "../components/file-preview"
+import { Loading } from "../components/loading"
+import { RemotePreview } from "../components/remote-preview"
+import { YouTubePreview } from "../components/youtube-preview"
+import { ChatGPTResponse } from "../types/openai-types"
+import { useAppContext } from "../context/app-context"
 
 interface Questions {
   id: string
@@ -18,86 +29,251 @@ interface Questions {
 const BASE_URL = "http://localhost:8000"
 
 export const UploadView: React.FC = () => {
+  // local file
   const [file, setFile] = useState<File | null>(null)
-  const [yt_url, setYouTubeUrl] = useState<string | null>(null)
-
   const [loading, setLoading] = useState(false)
+
+  // remote file
+  const [loadingRemote, setLoadingRemote] = useState(false)
+  const [remote, setRemote] = useState<string | null>(null)
+
+  // youtube
+  const [loadingYouTube, setLoadingYouTube] = useState(false)
+
+  // -> https://www.youtube.com/watch?v=6jA0xePC-pM
+  const [youTubeVideoUrl, setYouTubeVideoUrl] = useState<string | null>(null)
+
   const [result, setResult] = useState<string | null>(null)
   const [answers, setAnswers] = useState<[string] | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
-  const [questions, setQuestions] = useLocalStorage<Array<Questions>>("questions",[])
+  const { appQuestions, addQuestion } = useAppContext()
+
+  // const [questions, setQuestions] = useLocalStorage<Array<Questions>>(
+  //   "questions",
+  //   []
+  // )
 
   let navigate = useNavigate()
 
-  const onProcessing = async () => {
-    setLoading(true)
+  const generateQuestions = async (response: AssemblyResponse) => {
+    console.info("generate questions...")
+
+    for (let i = 0; i < response.chapters.length; i++) {
+      const url_question =
+        `${BASE_URL}/chatgpt?` +
+        new URLSearchParams({
+          input_text: response.chapters[i]["summary"],
+          generate_question: `${true}`
+        }).toString()
+
+      const chatgpt_question_data = await fetch(url_question)
+      const chatgpt_question: ChatGPTResponse =
+        await chatgpt_question_data.json()
+      console.log("chatgpt_question", chatgpt_question)
+
+      const url_answer =
+        `${BASE_URL}/chatgpt?` +
+        new URLSearchParams({
+          input_text: chatgpt_question["message"],
+          generate_question: `${false}`
+        }).toString()
+
+      const chatgpt_answer_data = await fetch(url_answer)
+      const chatgpt_answer: ChatGPTResponse = await chatgpt_answer_data.json()
+      console.log("chatgpt_answer", chatgpt_answer)
+
+      addQuestion(chatgpt_question.message, chatgpt_answer.message)
+    }
+
+    // console.log(response.chapters)
+
+    // const chatgptUrls = response.chapters.map(chapter => {
+    //   const cParams = new URLSearchParams()
+    //   cParams.append("input_text", chapter.summary)
+    //   cParams.append("generate_question", `${true}`)
+
+    //   const cUrl = `${BASE_URL}/chatgpt?${cParams}`
+
+    //   // console.log(u)
+    //   return cUrl
+    // })
+
+    // // https://stackoverflow.com/a/67146861/18175280
+    // const requests = chatgptUrls.map(u => fetch(u))
+    // const responses = await Promise.all(requests)
+
+    // const data: Array<ChatGPTResponse> = await Promise.all(
+    //   responses.map(response => response.json())
+    // )
+
+    // console.log(data)
+  }
+
+  const onYouTubeUpload = async () => {
+    setLoadingYouTube(true)
     setResult(null)
 
-    if (file === null && yt_url === null) {
-      throw new Error("file or url must not be null")
+    if (youTubeVideoUrl === null) {
+      setError("pls provide a youtube video url before continiuing")
+      return
     }
-    try {
-      let assembly_response: any
-      if (yt_url !== null){
-        console.info("process youtube link...")
-        console.info(yt_url)
-        const url = (
-          `${BASE_URL}/assembly/youtube?` +
-          new URLSearchParams({ yt_url: yt_url}).toString()
-        )
-        const assembly_data = await fetch(url)
-        assembly_response = await assembly_data.json()
-      } else {
-        const body = new FormData()
-        body.append("file", file)
-        
-        console.info("upload file...")
-        const assembly_data = await fetch(`${BASE_URL}/assembly`, {
-          body,
-          method: "POST"
-        })
-        assembly_response = await assembly_data.json()
-      }
-      
-      console.info("generate questions...")
-      for (let i = 0; i < assembly_response["chapters"].length; i++) {
-        const url_question =
-        `${BASE_URL}/chatgpt?` +
-        new URLSearchParams({
-          input_text: assembly_response["chapters"][i]["summary"],
-          generate_question: true
-          }).toString()
 
-        const chatgpt_question_data = await fetch(url_question)
-        const chatgpt_question = await chatgpt_question_data.json()
+    console.info("process youtube link...")
+    console.info(youTubeVideoUrl)
 
-        const url_answer =
-        `${BASE_URL}/chatgpt?` +
-        new URLSearchParams({
-          input_text: chatgpt_question['message'],
-          generate_question: false
-          }).toString()
+    const params = new URLSearchParams()
+    params.append("yt_url", youTubeVideoUrl)
 
-        const chatgpt_answer_data = await fetch(url_answer)
-        const chatgpt_answer = await chatgpt_answer_data.json()
+    const url = `${BASE_URL}/assembly/youtube?${params}`
 
-        questions.push({
-          id: i.toString(),
-          question: chatgpt_question['message'],
-          answer: chatgpt_answer['message'],
-          visibleAnswer: false,
-          voiceInputFile: null,
-          voiceInputUrl: null
-        })
-      }
+    const request = await fetch(url)
 
-      setResult(assembly_response["chapters"][0]["summary"])
-      setLoading(false)
-    } catch (e) {
-      console.error(e)
-      // TODO alert: something went wrong, please try again...
-    }
+    const response: AssemblyResponse = await request.json()
+    // console.log(response)
+
+    setResult(response.chapters[0].summary)
+
+    generateQuestions(response)
+
+    setYouTubeVideoUrl(null)
+    setLoadingYouTube(false)
+
+    // throw new Error("e")
+
+    // try {
+    //   let assembly_response: AssemblyResponse
+
+    //   if (youTubeVideoUrl !== null) {
+    //     console.info("process youtube link...")
+    //     console.info(youTubeVideoUrl)
+
+    //     const params = new URLSearchParams()
+    //     params.append("yt_url", youTubeVideoUrl)
+
+    //     const u = `${BASE_URL}/assembly/youtube?${params}`
+    //     console.log(u)
+
+    //     const url =
+    //       `${BASE_URL}/assembly/youtube?` +
+    //       new URLSearchParams({ yt_url: youTubeVideoUrl }).toString()
+    //     const assembly_data = await fetch(url)
+    //     assembly_response = await assembly_data.json()
+    //   } else {
+    //     const body = new FormData()
+    //     body.append("file", file)
+
+    //     console.info("upload file...")
+    //     const assembly_data = await fetch(`${BASE_URL}/assembly`, {
+    //       body,
+    //       method: "POST"
+    //     })
+    //     assembly_response = await assembly_data.json()
+    //   }
+
+    //   console.info("generate questions...")
+    //   for (let i = 0; i < assembly_response["chapters"].length; i++) {
+    //     const url_question =
+    //       `${BASE_URL}/chatgpt?` +
+    //       new URLSearchParams({
+    //         input_text: assembly_response["chapters"][i]["summary"],
+    //         generate_question: true
+    //       }).toString()
+
+    //     const chatgpt_question_data = await fetch(url_question)
+    //     const chatgpt_question = await chatgpt_question_data.json()
+
+    //     const url_answer =
+    //       `${BASE_URL}/chatgpt?` +
+    //       new URLSearchParams({
+    //         input_text: chatgpt_question["message"],
+    //         generate_question: false
+    //       }).toString()
+
+    //     const chatgpt_answer_data = await fetch(url_answer)
+    //     const chatgpt_answer = await chatgpt_answer_data.json()
+
+    //     questions.push({
+    //       id: i.toString(),
+    //       question: chatgpt_question["message"],
+    //       answer: chatgpt_answer["message"],
+    //       visibleAnswer: false,
+    //       voiceInputFile: null,
+    //       voiceInputUrl: null
+    //     })
+    //   }
+
+    //   setResult(assembly_response["chapters"][0]["summary"])
+    //   setLoadingYouTube(false)
+    // } catch (e) {
+    //   console.error(e)
+    //   // TODO alert: something went wrong, please try again...
+    // }
   }
+
+  const onRemoteFileUpload = async () => {
+    setLoadingRemote(true)
+    if (remote === null) {
+      setError("pls provide a remote url before continiuing")
+      return
+    }
+
+    const body = JSON.stringify({
+      remote_audio_url: remote
+    })
+
+    const headers = new Headers()
+    headers.append("Content-Type", "application/json")
+
+    const request = await fetch(`${BASE_URL}/assembly/remote`, {
+      method: "POST",
+      body,
+      headers
+    })
+
+    const response: AssemblyResponse = await request.json()
+
+    // TODO: do something?
+    console.log(response)
+
+    setResult(response.chapters[0].summary)
+
+    generateQuestions(response)
+
+    setRemote(null)
+    setLoadingRemote(false)
+  }
+
+  const onLocalFileUpload = async () => {
+    setLoading(true)
+    if (file === null) {
+      setError("pls provide a file before continiuing")
+      return
+    }
+    const body = new FormData()
+    body.append("file", file)
+
+    const request = await fetch(`${BASE_URL}/assembly/file`, {
+      method: "POST",
+      body
+    })
+
+    const response: AssemblyResponse = await request.json()
+
+    // TODO: do something?
+    console.log(response)
+
+    setResult(response.chapters[0].summary)
+
+    generateQuestions(response)
+
+    setLoading(false)
+    setFile(null)
+  }
+
+  useEffect(() => {
+    console.log(youTubeVideoUrl)
+  }, [youTubeVideoUrl])
 
   return (
     <div className="flex flex-col space-y-9 font-inter">
@@ -112,55 +288,58 @@ export const UploadView: React.FC = () => {
         </p>
       </div>
 
-      <div className="flex flex-col py-9 space-y-6">
-        <div className="flex w-full space-x-6">
-          <InputForm>
-            <FileUpload setFile={setFile}/>
+      {error && (
+        <div className="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg">
+          <span className="font-medium">An error occurred:</span> {error}
+        </div>
+      )}
+
+      <div className="flex flex-col ">
+        <div className="grid grid-cols-3 gap-6">
+          <InputForm title="From Local File" withPointer={file === null}>
+            {file === null && <FileUpload setFile={setFile} />}
+            {file !== null && loading === false && (
+              <FilePreview fileName={file.name} onClick={onLocalFileUpload} />
+            )}
+            {loading && <Loading />}
           </InputForm>
-          <InputForm>
-            <YouTubeVideo setYouTubeUrl={setYouTubeUrl}/>
+
+          <InputForm title="From YouTube Video" withPointer={false}>
+            {youTubeVideoUrl === null && (
+              <YouTubeVideo setYouTubeUrl={setYouTubeVideoUrl} />
+            )}
+            {youTubeVideoUrl !== null && loadingYouTube === false && (
+              <YouTubePreview onClick={onYouTubeUpload} />
+            )}
+            {loadingYouTube && <Loading />}
+          </InputForm>
+
+          <InputForm title="From Remote File" withPointer={false}>
+            {remote === null && <RemoteFile setFileUrl={setRemote} />}
+            {remote !== null && loadingRemote === false && (
+              <RemotePreview onClick={onRemoteFileUpload} />
+            )}
+
+            {loadingRemote && <Loading />}
           </InputForm>
         </div>
 
-        <div>
-          <button className="bg-rose-500 hover:bg-rose-400 text-white font-bold py-2 px-4 rounded inline-flex items-center"
-            onClick={onProcessing}>
-            {loading ? (
-              <svg
-                aria-hidden="true"
-                role="status"
-                className="inline mr-1 w-5 h-5 text-white animate-spin"
-                viewBox="0 0 100 101"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-                  fill="#E5E7EB"
-                />
-                <path
-                  d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-                  fill="currentColor"
-                />
-              </svg>
-            ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                width="24"
-                height="24"
-                className="fill-white"
-              >
-                <path fill="none" d="M0 0h24v24H0z" />
-                <path d="M15.224 15.508l-2.213 4.65a.6.6 0 0 1-.977.155l-3.542-3.739a.6.6 0 0 0-.357-.182l-5.107-.668a.6.6 0 0 1-.449-.881l2.462-4.524a.6.6 0 0 0 .062-.396L4.16 4.86a.6.6 0 0 1 .7-.7l5.063.943a.6.6 0 0 0 .396-.062l4.524-2.462a.6.6 0 0 1 .881.45l.668 5.106a.6.6 0 0 0 .182.357l3.739 3.542a.6.6 0 0 1-.155.977l-4.65 2.213a.6.6 0 0 0-.284.284zm.797 1.927l1.414-1.414 4.243 4.242-1.415 1.415-4.242-4.243z" />
-              </svg>
-            )}
-            <span className="ml-3">
-              {loading ? "Processing..." : "Generate"}
-            </span>
-          </button>
-        </div>
         <div>{result && <div> Summary (1. Chapter): {result} </div>}</div>
+
+        <div className="relative flex flex-col w-full h-[500px] overflow-y-auto bg-white rounded-md py-3 mt-32">
+          {appQuestions.map(q => {
+            return (
+              <div className="w-full flex" key={q.id}>
+                <span className="font-bold text-rose-500 pr-3 w-full flex-1  text-right">
+                  {q.question}
+                </span>
+                <span className="text-slate-500 w-full flex-1">
+                  {q.chatGptAnswer}
+                </span>
+              </div>
+            )
+          })}
+        </div>
       </div>
     </div>
   )
