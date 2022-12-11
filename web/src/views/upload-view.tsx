@@ -231,9 +231,9 @@ export const UploadView: React.FC = () => {
           Upload Media
         </h3>
         <p className="mt-2 max-w-4xl text-gray-500">
-          Professor.ai will analyze the provided video and automatically extract
+          Professor.ai analyses the provided video and automatically extracts
           important and interesting questions. Of course this also includes the
-          answer to them.
+          correct answer to them!
         </p>
       </div>
 

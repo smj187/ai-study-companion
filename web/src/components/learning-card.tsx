@@ -43,6 +43,10 @@ export const LearningCard: React.FC<Props> = ({
     )
   }
 
+  const getCorrectAnswer = () => {
+    return activeQuestion?.assemblyAnswer ?? null
+  }
+
   const getUserAnswer = () => {
     return activeQuestion?.userAnswer ?? null
   }
@@ -97,7 +101,7 @@ export const LearningCard: React.FC<Props> = ({
 
       {/* navigation buttons */}
       <div className="absolute bottom-1 right-1 flex space-x-1 items-center">
-        <PopUp title="Answer" text="Generate Questions...TODO" />
+        <PopUp title="Correct Answer" text={getCorrectAnswer()} />
 
         <span className="text-slate-300 px-3">|</span>
 

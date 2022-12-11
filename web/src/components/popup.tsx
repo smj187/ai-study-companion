@@ -2,8 +2,8 @@ import { Dialog, Transition } from "@headlessui/react"
 import { Fragment, useState } from "react"
 
 interface Props {
-  title: string
-  text: string
+  title: string | null
+  text: string | null
 }
 
 export const PopUp: React.FC<Props> = ({ title, text }) => {
