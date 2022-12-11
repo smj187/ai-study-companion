@@ -65,7 +65,7 @@ export const Header = () => {
                     ></path>
                   </svg>
                   <span className="h-8 w-auto text-rose-500 ml-1 text-xl font-inter font-black mt-1">
-                    professor.ai
+                    Professor.ai
                   </span>
                 </div>
                 <div className="hidden sm:ml-6 sm:flex sm:space-x-8"></div>

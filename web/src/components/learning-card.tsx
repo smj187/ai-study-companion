@@ -21,7 +21,7 @@ const Student = () => {
 const Professor = () => {
   return (
     <span className="font-bold text-rose-500 pr-3 w-full max-w-xs  text-right">
-      professor.ai
+      Professor.ai
     </span>
   )
 }
@@ -52,9 +52,9 @@ export const LearningCard: React.FC<Props> = ({
   }
 
   const getCorrectUserAnswer = () => {
-    return activeQuestion?.answerIsCorrect
-      ? "This is correct!"
-      : "This is not completely correct. Have another try!"
+      return activeQuestion?.answerIsCorrect
+        ? "This is correct!"
+        : "This is not completely correct. Have another try!"
   }
 
   return (
